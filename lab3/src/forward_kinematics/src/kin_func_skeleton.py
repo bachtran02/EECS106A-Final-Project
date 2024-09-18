@@ -104,7 +104,11 @@ def skew_3d(omega):
     omega_hat - (3,3) ndarray: the corresponding skew symmetric matrix
     """
 
-    # YOUR CODE HERE
+    return np.array([[0, -omega[2], omega[1]],
+                     [omega[2], 0, -omega[0]],
+                     [-omega[1], omega[0], 0]])
+ 
+
 
 def rotation_3d(omega, theta):
     """
@@ -118,7 +122,17 @@ def rotation_3d(omega, theta):
     rot - (3,3) ndarray: the resulting rotation matrix
     """
 
-    # YOUR CODE HERE
+    omg_hat = skew_3d(omega)
+    omg_norm = np.linalg.norm(omega)
+
+    # if omg_norm == 0:
+    #     return np.eye(3)
+
+    return \
+        np.eye(3) \
+            + omg_hat/omg_norm * np.sin(omg_norm * theta) \
+            + np.dot(omg_hat, omg_hat)/omg_norm**2 * (1 - np.cos(omg_norm * theta))
+
 
 def hat_3d(xi):
     """
@@ -131,7 +145,12 @@ def hat_3d(xi):
     xi_hat - (4,4) ndarray: the corresponding 4x4 matrix
     """
 
-    # YOUR CODE HERE
+    return np.array([[0, -xi[5], xi[4], xi[0]],
+                     [xi[5], 0, -xi[3], xi[1]], 
+                     [-xi[4], xi[3], 0, xi[2]],
+                     [0, 0, 0, 0]])
+
+
 
 def homog_3d(xi, theta):
     """
@@ -145,7 +164,23 @@ def homog_3d(xi, theta):
     g - (4,4) ndarary: the resulting homogeneous transformation matrix
     """
 
-    # YOUR CODE HERE
+    ret = np.eye(4)
+    if xi.all() == 0:
+        ret[3:,3:] = xi[:3] * theta
+        ret[3,:3] = 0
+        return ret
+    else:
+        rot = xi[3:].reshape(3,1)
+        trans = xi[:3].reshape(3,1)
+
+        rot_3d = rotation_3d(xi[3:], theta)
+        omg_hat = skew_3d(xi[3:])
+        omg_norm = np.linalg.norm(rot)
+
+        ret[:3,:3] = rot_3d
+        ret[:3, 3:] = (1 / omg_norm**2) * ((np.eye(3) - rot_3d) @ (omg_hat @ trans) + (rot @ (rot.T @ trans)) * theta)
+        ret[3,:3] = 0
+        return ret
 
 
 def prod_exp(xi, theta):
@@ -160,8 +195,12 @@ def prod_exp(xi, theta):
     Returns:
     g - (4,4) ndarray: the resulting homogeneous transformation matrix
     """
+    res = np.eye(4)
+    for i in range(len(theta)):
+        res = res @ homog_3d(xi[:, i], theta[i])
+    return res
 
-    # YOUR CODE HERE
+    
 
 #---------------------------------TESTING CODE---------------------------------
 #-------------------------DO NOT MODIFY ANYTHING BELOW HERE--------------------
