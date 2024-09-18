@@ -46,6 +46,29 @@ def baxter_forward_kinematics_from_angles(joint_angles):
 
     # YOUR CODE HERE (Task 1)
 
+    def twist(omega, q):
+        res = [0] * 6
+        res[:3] = -np.cross(omega, q)
+        res[3:] = omega
+        return np.array(res)  # return 6x1 matrix
+    
+    # xis = [twist(ws[0:3,i], qs[0:3,i]) for i in range(7)]
+    xis = np.array([twist(ws[0:3, i], qs[0:3, i]) for i in range(7)])
+    xis = xis.T  # Transpose to get the shape (7, 6)
+
+    g_0 = np.zeros((4,4))
+    g_0[0:3,0:3] = R
+    g_0[3,3] = 1
+    g_0[0:3,3] = qs[0:3,7]
+
+    # g = np.eye(4)
+    # for i in range(7):
+    #     g = g @ kfs.homog_3d(twist(ws[0:3, i], qs[0:3, i]))
+    g = kfs.prod_exp(xis, joint_angles)
+
+    return g @ g_0
+
+
 def baxter_forward_kinematics_from_joint_state(joint_state):
     """
     Computes the orientation of the Baxter's left end-effector given the joint
@@ -63,6 +86,11 @@ def baxter_forward_kinematics_from_joint_state(joint_state):
     angles = np.zeros(7)
 
     # YOUR CODE HERE (Task 2)
+    left = joint_state.position[2:9]
+    angles = [
+        left[2], left[3], left[0], left[1], left[4], left[5], left[6]
+    ]
+    # return baxter_forward_kinematics_from_angles(angles)
 
     # END YOUR CODE HERE
     print(baxter_forward_kinematics_from_angles(angles))
