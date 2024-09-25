@@ -10,7 +10,7 @@ import rospy
 import tf2_ros
 import sys
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TransformStamped
 
 #Define the method which contains the main functionality of the node.
 def controller(turtlebot_frame, goal_frame):
@@ -25,7 +25,7 @@ def controller(turtlebot_frame, goal_frame):
   ################################### YOUR CODE HERE ##############
 
   #Create a publisher and a tf buffer, which is primed with a tf listener
-  pub = rospy.Publisher('INSTERT TOPIC HERE', Twist, queue_size=10)
+  pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
   tfBuffer = tf2_ros.Buffer()
   tfListener = tf2_ros.TransformListener(tfBuffer)
   
@@ -38,12 +38,14 @@ def controller(turtlebot_frame, goal_frame):
   # Loop until the node is killed with Ctrl-C
   while not rospy.is_shutdown():
     try:
-      trans = tfBuffer.lookup_transform(INSERT FRAME HERE, INSERT FRAME HERE, rospy.Time())
+      trans: TransformStamped = tfBuffer.lookup_transform(goal_frame, turtlebot_frame, rospy.Time())
 
       # Process trans to get your state error
       # Generate a control command to send to the robot
 
-      control_command = # Generate this
+      print("trans", trans)
+      control_command = Twist()
+      control_command.linear = trans.transform.translation
 
       #################################### end your code ###############
 
