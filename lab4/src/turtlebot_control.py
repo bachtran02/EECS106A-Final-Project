@@ -10,7 +10,7 @@ import rospy
 import tf2_ros
 import sys
 
-from geometry_msgs.msg import Twist, TransformStamped
+from geometry_msgs.msg import Twist, TransformStamped, Vector3
 
 #Define the method which contains the main functionality of the node.
 def controller(turtlebot_frame, goal_frame):
@@ -33,19 +33,24 @@ def controller(turtlebot_frame, goal_frame):
   # a 10Hz publishing rate
   r = rospy.Rate(10) # 10hz
 
-  K1 = 0.3
+  K1 = 0.1
   K2 = 1
   # Loop until the node is killed with Ctrl-C
   while not rospy.is_shutdown():
     try:
-      trans: TransformStamped = tfBuffer.lookup_transform(goal_frame, turtlebot_frame, rospy.Time())
-
+      trans: TransformStamped = tfBuffer.lookup_transform(turtlebot_frame, goal_frame, rospy.Time())
+      
       # Process trans to get your state error
       # Generate a control command to send to the robot
 
-      print("trans", trans)
+      print(trans)
+
+      # if abs(trans.transform.translation.x) <= 0.5:
+      #   break
+
       control_command = Twist()
-      control_command.linear = trans.transform.translation
+      control_command.linear = Vector3(trans.transform.translation.x * K1, 0, 0)
+      control_command.angular = Vector3(0, 0, trans.transform.translation.y * K2)
 
       #################################### end your code ###############
 
