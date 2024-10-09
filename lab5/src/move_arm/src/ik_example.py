@@ -49,7 +49,7 @@ def main():
 
             # TRY THIS
             # Setting just the position without specifying the orientation
-            ###group.set_position_target([0.5, 0.5, 0.0])
+            group.set_position_target([0.5, 0.5, 0.0])
 
             # Plan IK
             plan = group.plan()
