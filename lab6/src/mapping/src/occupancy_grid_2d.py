@@ -138,8 +138,6 @@ class OccupancyGrid2d(object):
         if abs(roll) > 0.1 or abs(pitch) > 0.1:
             rospy.logwarn("%s: Turtlebot roll/pitch is too large.", self._name)
 
-        voxel_occupied = set()
-
         # Loop over all ranges in the LaserScan.
         for idx, r in enumerate(msg.ranges):
             # Randomly throw out some rays to speed this up.
@@ -151,7 +149,7 @@ class OccupancyGrid2d(object):
             # Get angle of this ray in fixed frame.
             # TODO!
             ray_angle_robot = msg.angle_min + idx * msg.angle_increment
-            ray_angle_fixed = ray_angle_robot + yaw
+            # ray_angle_fixed = ray_angle_robot + yaw
 
             # Throw out this point if it is too close or too far away.
             if r > msg.range_max:
@@ -168,10 +166,14 @@ class OccupancyGrid2d(object):
             # Only update each voxel once. 
             # The occupancy grid is stored in self._map
             # TODO!
+
+            R1 = np.array([np.cos(yaw), -np.sin(yaw)])
+            R2 = np.array([np.sin(yaw), np.cos(yaw)])
+
             x_end_robot = np.cos(ray_angle_robot)*r
             y_end_robot = np.sin(ray_angle_robot)*r
-            x_end_fixed = x_end_robot + sensor_x
-            y_end_fixed = y_end_robot + sensor_y
+            x_end_fixed = (R1[0] * x_end_robot) + (R1[1] * y_end_robot) + sensor_x
+            y_end_fixed = (R2[0] * x_end_robot) + (R2[1] * y_end_robot) + sensor_y
 
             end_voxel_x, end_voxel_y = self.PointToVoxel(x_end_fixed, y_end_fixed)
             robot_voxel_x, robot_voxel_y = self.PointToVoxel(sensor_x, sensor_y)
@@ -179,41 +181,44 @@ class OccupancyGrid2d(object):
             # don't update voxel robot is in
             voxel_visited = set((robot_voxel_x, robot_voxel_y))
 
-            occupied_log_update = self.ProbabilityToLogOdds(self._occupied_update)
-            free_log_update = self.ProbabilityToLogOdds(self._free_update)
+            occupied_log_update = self._occupied_update
+            free_log_update = self._free_update
 
-            occupied_log_threshold = self.ProbabilityToLogOdds(self._occupied_threshold)
-            free_log_threshold = self.ProbabilityToLogOdds(self._free_threshold)
+            occupied_log_threshold = self._occupied_threshold
+            free_log_threshold = self._free_threshold
+            
+            i = r
+            step_size = min(self._x_res, self._y_res)/2
 
-            for i in range(r, 0, -0.01 * r):
+            while i > 0:
 
                 x_end_robot = np.cos(ray_angle_robot)* i
                 y_end_robot = np.sin(ray_angle_robot)* i
-                x_end_fixed = x_end_robot + sensor_x
-                y_end_fixed = y_end_robot + sensor_y
+
+                x_end_fixed = (R1[0] * x_end_robot) + (R1[1] * y_end_robot) + sensor_x
+                y_end_fixed = (R2[0] * x_end_robot) + (R2[1] * y_end_robot) + sensor_y
 
                 end_voxel_x, end_voxel_y = self.PointToVoxel(x_end_fixed, y_end_fixed)
 
-                # check if voxel already visited
-                if (end_voxel_x, end_voxel_y) in voxel_visited:
+                # check if voxel already visited or out of range
+                if (end_voxel_x > self._x_num) or (end_voxel_y > self._y_num) or (end_voxel_x < 0) or (end_voxel_y < 0) or (end_voxel_x, end_voxel_y) in voxel_visited:
+                    i -= step_size
                     continue
 
                 # occupied voxel
                 if i == r:
-                    voxel_occupied.add((end_voxel_x, end_voxel_y))
-
-                if (end_voxel_x, end_voxel_y) in voxel_occupied:
                     self._map[end_voxel_x][end_voxel_y] = min(
                         occupied_log_threshold,
                         self._map[end_voxel_x][end_voxel_y] + occupied_log_update
                     )
                 else:
-                    self._map[end_voxel_x][end_voxel_y] = min(
+                    self._map[end_voxel_x][end_voxel_y] = max(
                         free_log_threshold,
                         self._map[end_voxel_x][end_voxel_y] + free_log_update
                     )
 
                 voxel_visited.add((end_voxel_x, end_voxel_y))
+                i -= step_size
 
         # Visualize.
         self.Visualize()
