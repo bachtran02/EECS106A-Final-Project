@@ -25,16 +25,74 @@ def main():
     request.ik_request.group_name = "right_arm"
 
     # If a Sawyer does not have a gripper, replace '_gripper_tip' with '_wrist' instead
-    link = "right_gripper_tip"
+    link = "stp_022312TP99620_tip_1"
+
+    request.ik_request.ik_link_name = link
+    # request.ik_request.attempts = 20
+    request.ik_request.pose_stamped.header.frame_id = "base"
+
+    # operate gripper
+    right_gripper.open()
+    rospy.sleep(1.0)
+    
+    # Set the desired orientation for the end effector HERE
+    request.ik_request.pose_stamped.pose.position.x = 0.691
+    request.ik_request.pose_stamped.pose.position.y = 0.130
+    request.ik_request.pose_stamped.pose.position.z = -0.101      
+    request.ik_request.pose_stamped.pose.orientation.x = 0.0
+    request.ik_request.pose_stamped.pose.orientation.y = 1.0
+    request.ik_request.pose_stamped.pose.orientation.z = 0.0
+    request.ik_request.pose_stamped.pose.orientation.w = 0.0
+    
+    try:
+
+        # Send the request to the service
+        response = compute_ik(request)
+        
+        # Print the response HERE
+        print(response)
+        group = MoveGroupCommander("right_arm")
+
+        # Setting position and orientation target
+        group.set_pose_target(request.ik_request.pose_stamped)
+
+        # TRY THIS
+        # # Setting just the position without specifying the orientation
+        # group.set_position_target([0.5, 0.5, 0.0])
+
+        # Plan IK
+        plan = group.plan()
+        user_input = input("Enter 'y' if the trajectory looks safe on RVIZ")
+        
+        # Execute IK if safe
+        if user_input == 'y':
+            group.execute(plan[1])
+        
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+    # operate gripper
+    right_gripper.close()
+    rospy.sleep(1.0)
+
+
+    # move to middle
+
+    # Construct the request
+    request = GetPositionIKRequest()
+    request.ik_request.group_name = "right_arm"
+
+    # If a Sawyer does not have a gripper, replace '_gripper_tip' with '_wrist' instead
+    link = "stp_022312TP99620_tip_1"
 
     request.ik_request.ik_link_name = link
     # request.ik_request.attempts = 20
     request.ik_request.pose_stamped.header.frame_id = "base"
     
     # Set the desired orientation for the end effector HERE
-    request.ik_request.pose_stamped.pose.position.x = 0.795
-    request.ik_request.pose_stamped.pose.position.y = 0.178
-    request.ik_request.pose_stamped.pose.position.z = -0.147      
+    request.ik_request.pose_stamped.pose.position.x = 0.682
+    request.ik_request.pose_stamped.pose.position.y = -0.145
+    request.ik_request.pose_stamped.pose.position.z = 0.091      
     request.ik_request.pose_stamped.pose.orientation.x = 0.0
     request.ik_request.pose_stamped.pose.orientation.y = 1.0
     request.ik_request.pose_stamped.pose.orientation.z = 0.0
@@ -66,9 +124,7 @@ def main():
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
 
-    # operate gripper
-    right_gripper.close()
-    rospy.sleep(1.0)
+
 
     # move to dest
 
@@ -77,16 +133,16 @@ def main():
     request.ik_request.group_name = "right_arm"
 
     # If a Sawyer does not have a gripper, replace '_gripper_tip' with '_wrist' instead
-    link = "right_gripper_tip"
+    link = "stp_022312TP99620_tip_1"
 
     request.ik_request.ik_link_name = link
     # request.ik_request.attempts = 20
     request.ik_request.pose_stamped.header.frame_id = "base"
     
     # Set the desired orientation for the end effector HERE
-    request.ik_request.pose_stamped.pose.position.x = 0.793
-    request.ik_request.pose_stamped.pose.position.y = -0.130
-    request.ik_request.pose_stamped.pose.position.z = -0.154      
+    request.ik_request.pose_stamped.pose.position.x = 0.735
+    request.ik_request.pose_stamped.pose.position.y = -0.379
+    request.ik_request.pose_stamped.pose.position.z = -0.056      
     request.ik_request.pose_stamped.pose.orientation.x = 0.0
     request.ik_request.pose_stamped.pose.orientation.y = 1.0
     request.ik_request.pose_stamped.pose.orientation.z = 0.0
