@@ -309,6 +309,6 @@ if __name__ == '__main__':
     animate function to visualize the full trajectory in a 3D plot.
     """
 
-    # path = LinearTrajectory(np.array([0, 0, 0]), np.array([.1, .1, .1]), 10)
-    path = CircularTrajectory(np.array([0.2, 0.4, 0.6]), .3, 10)
+    path = LinearTrajectory(np.array([0, 0, 0]), np.array([.1, .1, .1]), 10)
+    # path = CircularTrajectory(np.array([0.2, 0.4, 0.6]), .3, 10)
     path.display_trajectory()

@@ -27,9 +27,9 @@ def controller(waypoint):
   """
 
   # Create a publisher and a tf buffer, which is primed with a tf listener
-  pub = ## TODO: what topic should we publish to? how?
-  tfBuffer = ... ## TODO: initialize a buffer
-  tfListener = ## TODO: initialize a transform listener
+  pub =  rospy.Publisher('/cmd_vel', Twist, queue_size=10) ## TODO: what topic should we publish to? how?
+  tfBuffer = tf2_ros.Buffer() ## TODO: initialize a buffer
+  tfListener = tf2_ros.TransformListener(tfBuffer) ## TODO: initialize a transform listener
 
   # Create a timer object that will sleep long enough to result in
   # a 10Hz publishing rate
@@ -42,16 +42,16 @@ def controller(waypoint):
   Kd = np.diag([-0.5, 0.5]) # TODO: You may need to tune these values for your turtlebot
   Ki = np.diag([0, 0])
 
-  prev_time = # TODO: initialize your time, what rospy function would be helpful here?
-  integ = # TODO: initialize an empty np array -- make sure to keep your sizes consistent
-  derivative = # TODO: initialize an empty np array 
-  previous_error = # TODO: initialize an empty np array 
+  prev_time = rospy.Time() # TODO: initialize your time, what rospy function would be helpful here?
+  integ = np.array() # TODO: initialize an empty np array -- make sure to keep your sizes consistent
+  derivative = np.array() # TODO: initialize an empty np array 
+  previous_error = np.array() # TODO: initialize an empty np array 
 
   # Loop until the node is killed with Ctrl-C
   while not rospy.is_shutdown():
     try:
       #                                              target_frame, source_frame, current_time_in_ros, how long to wait for transform lookup
-      trans_odom_to_base_link = tfBuffer.lookup_transform(..., ..., rospy.Time(), rospy.Duration(5)) # TODO: create a transform between odom to base link
+      trans_odom_to_base_link = tfBuffer.lookup_transform("odom", "base_link", rospy.Time(), rospy.Duration(5)) # TODO: create a transform between odom to base link
 
       (roll, pitch, baselink_yaw) = tf.transformations.euler_from_quaternion(
         [trans_odom_to_base_link.transform.rotation.x, trans_odom_to_base_link.transform.rotation.y,
