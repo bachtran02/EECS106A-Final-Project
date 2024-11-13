@@ -58,16 +58,16 @@ def controller(waypoint):
             trans_odom_to_base_link.transform.rotation.z, trans_odom_to_base_link.transform.rotation.w])
 
 
-      waypoint_trans = # TODO: initialize a PoseStamped
-      waypoint_trans.pose.position.x = # TODO: what value would you use here?
-      waypoint_trans.pose.position.y = # TODO: what value would you use here?
-      waypoint_trans.pose.position.z = # TODO: what value would you use here?  # Assuming the waypoint is on the ground
+      waypoint_trans = PoseStamped() # TODO: initialize a PoseStamped
+      waypoint_trans.pose.position.x = trans_odom_to_base_link.transform.translation.x # TODO: what value would you use here?
+      waypoint_trans.pose.position.y = trans_odom_to_base_link.transform.translation.y # TODO: what value would you use here?
+      waypoint_trans.pose.position.z = 0 # TODO: what value would you use here?  # Assuming the waypoint is on the ground
 
-      quat = quaternion_from_euler() # TODO: what would be the inputs to this function (there are 3)
-      waypoint_trans.pose.orientation.x = # TODO: what value would you use here?
-      waypoint_trans.pose.orientation.y = # TODO: what value would you use here?
-      waypoint_trans.pose.orientation.z = # TODO: what value would you use here?
-      waypoint_trans.pose.orientation.w = # TODO: what value would you use here?
+      quat = quaternion_from_euler(roll, pitch, baselink_yaw) # TODO: what would be the inputs to this function (there are 3)
+      waypoint_trans.pose.orientation.x = quat[1] # TODO: what value would you use here?
+      waypoint_trans.pose.orientation.y = quat[2] # TODO: what value would you use here?
+      waypoint_trans.pose.orientation.z = quat[3] # TODO: what value would you use here?
+      waypoint_trans.pose.orientation.w = quat[0] # TODO: what value would you use here?
 
       # Use the transform to compute the waypoint's pose in the base_link frame
       waypoint_in_base_link = do_transform_pose() # TODO: what would be the inputs to this function (there are 2)

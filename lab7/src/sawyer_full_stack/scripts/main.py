@@ -115,7 +115,9 @@ def get_trajectory(limb, kin, ik_solver, tag_pos, args):
         target_pos = tag_pos[0]
         target_pos[2] += 0.5
         print("TARGET POSITION:", target_pos)
-        trajectory = CircularTrajectory(center_position=target_pos, radius=0.1, total_time=15)
+        # trajectory = CircularTrajectory(center_position=target_pos, radius=0.1, total_time=15)
+        trajectory = CircularTrajectory(center_position=target_pos, radius=0.1, total_time=25)
+
 
     else:
         raise ValueError('task {} not recognized'.format(task))
