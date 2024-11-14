@@ -92,7 +92,9 @@ def plan_curved_trajectory(target_position):
     x2 = target_position[0] + x1 * np.cos(yaw) ## TODO: how would you get x2 from our target position? remember this is relative to x1 
     y2 = target_position[1] + y1 * np.sin(yaw)  ## TODO: how would you get x2 from our target position? remember this is relative to x1 
 
-    waypoints = generate_bezier_waypoints(x1, y1, yaw, x2, y2, yaw, offset=0.22, num_points=20)
+    # waypoints = generate_bezier_waypoints(x1, y1, yaw, x2, y2, yaw, offset=0.22, num_points=20)
+    waypoints = generate_bezier_waypoints(x1, y1, yaw, x2, y2, yaw, offset=0.20, num_points=10)
+
     plot_trajectory(waypoints)
 
     return waypoints
