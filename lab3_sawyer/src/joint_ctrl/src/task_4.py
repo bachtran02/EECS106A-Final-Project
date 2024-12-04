@@ -42,7 +42,6 @@ def map_keyboard(side):
     def set_j(limb, joint_name, delta):
         current_position = limb.joint_angle(joint_name)
         joint_command = {joint_name: current_position + delta}
-        print(joint_command)
         print("Executing" + str(joint_command))
         limb.set_joint_position_speed(0.3)
         limb.set_joint_positions(joint_command)
@@ -104,6 +103,37 @@ def map_keyboard(side):
                                        key=lambda x: x[1][2]):
                     print("  %s: %s" % (key, val[2]))
 
+
+        
+def input_angles(side):
+
+    joint_dict = {}
+    limb = intera_interface.Limb(side)
+
+    for name in limb.joint_names():
+        print(f'Enter angle for join {name}: ')
+        joint_dict[name] = float(input())
+
+    # test dict
+    # joint_dict = {
+    #     'right_j0': 0.0,
+    #     'right_j1': -1.0,
+    #     'right_j2': 0.0,
+    #     'right_j3': 1.5,
+    #     'right_j4': 0.0,
+    #     'right_j5': -0.5,
+    #     'right_j6': 1.7
+    # }
+
+    r = rospy.Rate(10)
+
+    while not rospy.is_shutdown():
+        limb.set_joint_position_speed(0.3)
+        limb.set_joint_positions(joint_dict)
+
+        r.sleep()
+
+
 def main():
     """RSDK Joint Position Example: Keyboard Control
 
@@ -146,7 +176,13 @@ See help inside the example with the '?' key for key bindings.
 
     rospy.loginfo("Enabling robot...")
     rs.enable()
-    map_keyboard(args.limb)
+
+
+    # map_keyboard(args.limb)
+
+    # print(args.limb)
+    input_angles(args.limb)
+
     print("Done.")
 
 

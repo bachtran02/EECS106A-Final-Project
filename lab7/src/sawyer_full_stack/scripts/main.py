@@ -60,12 +60,16 @@ def lookup_tag(tag_number):
 
     
     # TODO: initialize a tf buffer and listener as in lab 3
+    tfBuffer = tf2_ros.Buffer()
+    tfListener = tf2_ros.TransformListener(tfBuffer)
+
+    ar_tag_string = "ar_marker_{}".format(tag_number)
 
     try:
         # TODO: lookup the transform and save it in trans
         # The rospy.Time(0) is the latest available 
         # The rospy.Duration(10.0) is the amount of time to wait for the transform to be available before throwing an exception
-        trans = tfBuffer.lookup_transform(..., ..., rospy.Time(0), rospy.Duration(10.0))
+        trans = tfBuffer.lookup_transform("base", ar_tag_string, rospy.Time(0), rospy.Duration(10.0))
     except Exception as e:
         print(e)
         print("Retrying ...")
@@ -111,7 +115,9 @@ def get_trajectory(limb, kin, ik_solver, tag_pos, args):
         target_pos = tag_pos[0]
         target_pos[2] += 0.5
         print("TARGET POSITION:", target_pos)
-        trajectory = CircularTrajectory(center_position=target_pos, radius=0.1, total_time=15)
+        # trajectory = CircularTrajectory(center_position=target_pos, radius=0.1, total_time=15)
+        trajectory = CircularTrajectory(center_position=target_pos, radius=0.1, total_time=25)
+
 
     else:
         raise ValueError('task {} not recognized'.format(task))

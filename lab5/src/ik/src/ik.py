@@ -1,11 +1,23 @@
 #! /usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from std_msgs.msg import Header
 from intera_core_msgs.srv import SolvePositionIK, SolvePositionIKRequest
 
-def ik_service_client():
+def user_input():
+    """
+    (x, y, z) = (0.6, 0, 0.3)
+                (0.7, 0, 0.5)
+                (0.5, -0.3, 0.4)
+    """
+
+    x = float(input('Enter x: '))
+    y = float(input('Enter y: '))
+    z = float(input('Enter z: '))
+    return x, y, z
+
+def ik_service_client(x, y, z):
     service_name = "ExternalTools/right/PositionKinematicsNode/IKService"
     ik_service_proxy = rospy.ServiceProxy(service_name, SolvePositionIK)
     ik_request = SolvePositionIKRequest()
@@ -16,8 +28,15 @@ def ik_service_client():
     pose_stamped.header = header
 
     # Set end effector position: YOUR CODE HERE
+    pt = Point(x, y, z)
     
     # Set end effector quaternion: YOUR CODE HERE
+    quat = Quaternion(0, 1, 0, 0)
+
+    pose_stamped.pose = Pose(
+        position=pt,
+        orientation=quat
+    )
 
     # Add desired pose for inverse kinematics
     ik_request.pose_stamp.append(pose_stamped)
@@ -52,7 +71,9 @@ def ik_service_client():
 def main():
     rospy.init_node("ik_service_client")
 
-    ik_service_client()
+    x, y, z = user_input()
+
+    ik_service_client(x, y, z)
 
 if __name__ == '__main__':
     main()
