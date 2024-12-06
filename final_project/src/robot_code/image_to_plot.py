@@ -1,14 +1,15 @@
 import cv2
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
 
     assert len(tags) >= 3
     
-    x1, y1 = tags[0]
-    x2, y2 = tags[1]
-    x3, y3 = tags[2]
+    x1, y1, _ = tags[0]
+    x2, y2, _ = tags[1]
+    x3, y3, _ = tags[2]
     
     x4 = x2 + (x3 - x1)
     y4 = y2 + (y3 - y1)
@@ -90,13 +91,14 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
             if binary_array[i][j] == 1:
                 pts_to_plot.append(grid[i * (len(binary_array[0])) + j])
 
-    ## code to plot image
-    # x_coords, y_coords = zip(*pts_to_plot)
-    # plt.scatter(x_coords, y_coords, color='black', label='Points')  # Plot points
-    # plt.scatter([x1, x2, x3, x4], [y1, y2, y3, y4], color='red', marker='o')
-    # plt.scatter([xp1, xp2, xp3, xp4], [yp1, yp2, yp3, yp4], color='green', marker='o')
-    # plt.grid(True)  # Add gridlines for better visualization
+    # code to plot image
+    x_coords, y_coords = zip(*pts_to_plot)
+    plt.scatter(x_coords, y_coords, color='black', label='Points')  # Plot points
+    plt.scatter([x1, x2, x3, x4], [y1, y2, y3, y4], color='red', marker='o')
+    plt.scatter([xp1, xp2, xp3, xp4], [yp1, yp2, yp3, yp4], color='green', marker='o')
+    plt.grid(True)  # Add gridlines for better visualization
     # plt.show()
+    plt.savefig("plot_image.png", dpi=300)
 
     return pts_to_plot
 
