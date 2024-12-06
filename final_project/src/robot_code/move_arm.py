@@ -164,7 +164,7 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
 
     
 
-def move_arm_plot(points: list, group_name='right_arm', link='_gripper_tip', source_frame='base', paused=True):
+def move_arm_plot(points: list, group_name='right_arm', link='right_hand', source_frame='base', paused=True):
     """
     Note: If a Sawyer does not have a gripper,
     replace '_gripper_tip' with '_wrist' instead
@@ -178,7 +178,7 @@ def move_arm_plot(points: list, group_name='right_arm', link='_gripper_tip', sou
     
     for point in points:
 
-        x, y, z = point[0], point[1], -0.05
+        x, y, z = point[0], point[1], 0
 
         request = GetPositionIKRequest()
         request.ik_request.group_name = group_name
@@ -204,7 +204,7 @@ def move_arm_plot(points: list, group_name='right_arm', link='_gripper_tip', sou
             # print('IK Reponse:\n', response)
 
             # TODO: check for errors
-            group = MoveGroupCommander(group_name)
+            group = MoveGroupCommander(group_name, wait_for_servers=10)
             # Setting position and orientation target
             # NOTE: We can set the position without specifying orientation
             # group.set_position_target([0.5, 0.5, 0.0])
@@ -226,7 +226,7 @@ def move_arm_plot(points: list, group_name='right_arm', link='_gripper_tip', sou
 
         # ============================================ #
 
-        x, y, z = point[0], point[1], -0.05
+        x, y, z = point[0], point[1], -0.084
 
         request = GetPositionIKRequest()
         request.ik_request.group_name = group_name
@@ -275,7 +275,7 @@ def move_arm_plot(points: list, group_name='right_arm', link='_gripper_tip', sou
     
         # ==================================
 
-        x, y, z = point[0], point[1], -0.05
+        x, y, z = point[0], point[1], 0
 
         request = GetPositionIKRequest()
         request.ik_request.group_name = group_name
