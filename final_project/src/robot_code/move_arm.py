@@ -2,10 +2,11 @@ import roslaunch
 import rospkg
 import rospy
 
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float64
 
 from moveit_commander import MoveGroupCommander
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
+from moveit_msgs.msg import JointConstraint, PositionConstraint, Constraints
 
 button_pressed = False
 
@@ -57,6 +58,16 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
         request.ik_request.pose_stamped.pose.orientation.y = 1.0
         request.ik_request.pose_stamped.pose.orientation.z = 0.0
         request.ik_request.pose_stamped.pose.orientation.w = 0.0
+
+        # constraints
+        joint_constraint = JointConstraint()
+        joint_constraint.joint_name = 'right_j0'
+        joint_constraint.position = Float64(0.0)
+        joint_constraint.tolerance_above = Float64(0.5)
+        joint_constraint.tolerance_below = Float64(0.5)
+        joint_constraint.weight = Float64(1.0)
+
+        request.ik_request.constraints = [joint_constraint]
         
         try:
 
@@ -178,13 +189,29 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     
     for point in points:
 
-        x, y, z = point[0], point[1], 0
+        x, y, z = point[0], point[1], -0.01
 
         request = GetPositionIKRequest()
         request.ik_request.group_name = group_name
         request.ik_request.ik_link_name = link
         request.ik_request.pose_stamped.header.frame_id = source_frame
         # request.ik_request.attempts = 20
+
+        # constraints
+
+        # joint constraints
+        joint_constraint = JointConstraint()
+        joint_constraint.joint_name = 'right_j0'
+        joint_constraint.position = 0.0
+        joint_constraint.tolerance_above = 0.5
+        joint_constraint.tolerance_below = 0.5
+        joint_constraint.weight = 1.0
+
+        constraints = Constraints()
+        constraints.name = 'sawyer_constraints'
+        constraints.joint_constraints = [joint_constraint]
+
+        request.ik_request.constraints = constraints
 
         # Set the desired orientation for the end effector
         request.ik_request.pose_stamped.pose.position.x = x
@@ -210,6 +237,10 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
             # group.set_position_target([0.5, 0.5, 0.0])
             group.set_pose_target(request.ik_request.pose_stamped)
 
+            # set velocity
+            # group.set_max_velocity_scaling_factor(0.4)  # 50% of max velocity
+            # group.set_max_acceleration_scaling_factor(0.4)  # 50% of max acceleration
+
             # Plan IK
             plan = group.plan()
 
@@ -226,13 +257,28 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
 
         # ============================================ #
 
-        x, y, z = point[0], point[1], -0.084
+        x, y, z = point[0], point[1], -0.081
+        #x, y, z = point[0], point[1], 0.02
 
         request = GetPositionIKRequest()
         request.ik_request.group_name = group_name
         request.ik_request.ik_link_name = link
         request.ik_request.pose_stamped.header.frame_id = source_frame
         # request.ik_request.attempts = 20
+
+        # constraints
+        joint_constraint = JointConstraint()
+        joint_constraint.joint_name = 'right_j0'
+        joint_constraint.position = 0.0
+        joint_constraint.tolerance_above = 0.5
+        joint_constraint.tolerance_below = 0.5
+        joint_constraint.weight = 1.0
+
+        constraints = Constraints()
+        constraints.name = 'sawyer_constraints'
+        constraints.joint_constraints = [joint_constraint]
+
+        request.ik_request.constraints = constraints
 
         # Set the desired orientation for the end effector
         request.ik_request.pose_stamped.pose.position.x = x
@@ -258,6 +304,10 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
             # group.set_position_target([0.5, 0.5, 0.0])
             group.set_pose_target(request.ik_request.pose_stamped)
 
+            # set velocity
+            # group.set_max_velocity_scaling_factor(0.75)  # 50% of max velocity
+            # group.set_max_acceleration_scaling_factor(0.75)  # 50% of max acceleration
+
             # Plan IK
             plan = group.plan()
 
@@ -275,13 +325,27 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     
         # ==================================
 
-        x, y, z = point[0], point[1], 0
+        x, y, z = point[0], point[1], -0.01
 
         request = GetPositionIKRequest()
         request.ik_request.group_name = group_name
         request.ik_request.ik_link_name = link
         request.ik_request.pose_stamped.header.frame_id = source_frame
         # request.ik_request.attempts = 20
+
+        # constraints
+        joint_constraint = JointConstraint()
+        joint_constraint.joint_name = 'right_j0'
+        joint_constraint.position = 0.0
+        joint_constraint.tolerance_above = 0.5
+        joint_constraint.tolerance_below = 0.5
+        joint_constraint.weight = 1.0
+
+        constraints = Constraints()
+        constraints.name = 'sawyer_constraints'
+        constraints.joint_constraints = [joint_constraint]
+
+        request.ik_request.constraints = constraints
 
         # Set the desired orientation for the end effector
         request.ik_request.pose_stamped.pose.position.x = x

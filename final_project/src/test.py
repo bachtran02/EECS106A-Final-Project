@@ -43,7 +43,17 @@ def move_arm_downward():
         rospy.logwarn("Failed to move arm downward.")
 
 if __name__ == "__main__":
-    try:
-        move_arm_downward()
-    except rospy.ROSInterruptException:
-        pass
+    # try:
+    #     move_arm_downward()
+    # except rospy.ROSInterruptException:
+    #     pass
+
+    from moveit_commander import RobotCommander
+
+    # Initialize MoveIt! Commander
+    robot_commander = RobotCommander()
+
+    # Get the joint names for the robot
+    joint_names = robot_commander.get_group('right_arm').get_joints()
+
+    print(joint_names)

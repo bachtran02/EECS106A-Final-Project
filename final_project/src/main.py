@@ -14,8 +14,9 @@ def main():
     rospack = rospkg.RosPack()
     prefix_path = rospack.get_path('final_project')
 
-    image_path = prefix_path + '/../assets/img/bw_smiley.jpg'
-    ar_tags = [2, 1, 5]
+    image_path = prefix_path + '/../assets/img/bw_smiley_min.jpg'
+    #image_path = prefix_path + '/../assets/img/fish.jpg'
+    ar_tags = [5, 1, 2]
 
     # initialize node
     rospy.init_node('art_sawyer')
@@ -26,7 +27,10 @@ def main():
     # find positions of AR tags
     tags_pos = [lookup_tag(ar_tag) for ar_tag in ar_tags]
 
-    points_to_paint = create_rectangle_dots(tags_pos, image_path, offset=0.04, dot_dist=0.004)
+    # points_to_paint = create_rectangle_dots(tags_pos, image_path, offset=0.05, dot_dist=0.004)
+    points_to_paint = create_rectangle_dots(tags_pos, image_path, offset=0.06, dot_dist=0.005)
+    # points_to_paint = points_to_paint[::-1]
+    #print("Points: ", len(points_to_paint))
     move_arm_plot(points_to_paint, paused=False, link='right_hand')
 
 if __name__ == '__main__':

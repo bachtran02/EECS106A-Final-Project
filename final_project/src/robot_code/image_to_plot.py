@@ -100,6 +100,7 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
     # plt.show()
     plt.savefig("plot_image.png", dpi=300)
 
+    # return [(xp1, yp1), (xp2, yp2), (xp3, yp3), (xp4, yp4)]
     return pts_to_plot
 
 def process_image(image_path, canvas_width, canvas_height):
