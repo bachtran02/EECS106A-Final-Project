@@ -41,7 +41,7 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
 
     points_with_z = []
 
-    for point in points[:1]:
+    for point in points:
 
         x, y, z = point[0], point[1], 0.1
         request = GetPositionIKRequest()
@@ -59,15 +59,19 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
         request.ik_request.pose_stamped.pose.orientation.z = 0.0
         request.ik_request.pose_stamped.pose.orientation.w = 0.0
 
-        # constraints
+        # joint constraints
         joint_constraint = JointConstraint()
         joint_constraint.joint_name = 'right_j0'
-        joint_constraint.position = Float64(0.0)
-        joint_constraint.tolerance_above = Float64(0.5)
-        joint_constraint.tolerance_below = Float64(0.5)
-        joint_constraint.weight = Float64(1.0)
+        joint_constraint.position = 0.0
+        joint_constraint.tolerance_above = 0.5
+        joint_constraint.tolerance_below = 0.5
+        joint_constraint.weight = 1.0
 
-        request.ik_request.constraints = [joint_constraint]
+        constraints = Constraints()
+        constraints.name = 'sawyer_constraints'
+        constraints.joint_constraints = [joint_constraint]
+
+        request.ik_request.constraints = constraints
         
         try:
 
@@ -115,18 +119,31 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
         request.ik_request.pose_stamped.pose.orientation.z = 0.0
         request.ik_request.pose_stamped.pose.orientation.w = 0.0
 
-        z = 0.1
-        step_down_dist = 0.005
-        rate = rospy.Rate(10)
+        z = 0
+        step_down_dist = 0.004
 
         while True:
             
             request.ik_request.pose_stamped.pose.position.z = z
             z -= step_down_dist
 
-            if button_pressed == True or z <= -0.13:
+            # joint constraints
+            joint_constraint = JointConstraint()
+            joint_constraint.joint_name = 'right_j0'
+            joint_constraint.position = 0.0
+            joint_constraint.tolerance_above = 0.8
+            joint_constraint.tolerance_below = 0.8
+            joint_constraint.weight = 1.0
+
+            constraints = Constraints()
+            constraints.name = 'sawyer_constraints'
+            constraints.joint_constraints = [joint_constraint]
+
+            request.ik_request.constraints = constraints
+
+            if button_pressed == True:
                 # record z position
-                points_with_z.append([points[0], points[1], z])
+                points_with_z.append([x, y, z])
                 print(points_with_z[-1])
                 button_pressed = False
                 # move back up
@@ -169,8 +186,7 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
             except rospy.ServiceException as e:
                 print("Service call failed: %s"%e)
         
-        break
-
+    print(points_with_z)
     return points_with_z
 
     
@@ -188,7 +204,6 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
 
     
     for point in points:
-
         x, y, z = point[0], point[1], -0.01
 
         request = GetPositionIKRequest()
@@ -348,13 +363,13 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
         request.ik_request.constraints = constraints
 
         # Set the desired orientation for the end effector
-        request.ik_request.pose_stamped.pose.position.x = x
-        request.ik_request.pose_stamped.pose.position.y = y
+        #request.ik_request.pose_stamped.pose.position.x = x
+        #request.ik_request.pose_stamped.pose.position.y = y
         request.ik_request.pose_stamped.pose.position.z = z
-        request.ik_request.pose_stamped.pose.orientation.x = 0.0
-        request.ik_request.pose_stamped.pose.orientation.y = 1.0
-        request.ik_request.pose_stamped.pose.orientation.z = 0.0
-        request.ik_request.pose_stamped.pose.orientation.w = 0.0
+        #request.ik_request.pose_stamped.pose.orientation.x = 0.0
+        #request.ik_request.pose_stamped.pose.orientation.y = 1.0
+        #request.ik_request.pose_stamped.pose.orientation.z = 0.0
+        #request.ik_request.pose_stamped.pose.orientation.w = 0.0
         
         try:
 

@@ -18,6 +18,6 @@ void loop() {
   if (buttonState == LOW) {
     // turn LED on:
     Serial.println("pressed");
-    delay(500);
+    delay(2000);
   }
 }

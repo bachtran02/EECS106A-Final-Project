@@ -9,7 +9,7 @@ def button_publisher():
     pub = rospy.Publisher('/button_topic', Bool, queue_size=10)
 
     # Initialize serial communication (adjust the port to match your setup)
-    arduino = serial.Serial('/dev/ttyACM1', 9600, timeout=1)
+    arduino = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
     arduino.flush()
 
     rate = rospy.Rate(10)  # 10 Hz publishing rate
