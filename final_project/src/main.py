@@ -16,7 +16,9 @@ def main():
 
     #image_path = prefix_path + '/../assets/img/bw_smiley_min.jpg'
     #image_path = prefix_path + '/../assets/img/eagle.jpg'
-    image_path = prefix_path + '/../assets/img/dog.png'
+    # image_path = prefix_path + '/../assets/img/dog.png'
+    image_path = prefix_path + '/../assets/img/cat.jpg'
+
 
     ar_tags = [2, 5, 1]
 
@@ -30,8 +32,8 @@ def main():
     tags_pos = [lookup_tag(ar_tag) for ar_tag in ar_tags]
 
     # points_to_paint = create_rectangle_dots(tags_pos, image_path, offset=0.05, dot_dist=0.004)
-    points_to_paint = create_rectangle_dots(tags_pos, image_path, offset=0.06, dot_dist=0.0045)
-    #print(len(points_to_paint))
+    points_to_paint = create_rectangle_dots(tags_pos, image_path, offset=0.06, dot_dist=0.005)
+    # print(len(points_to_paint))
     #print(points_to_paint)
     # points_to_paint = move_arm_probe(points_to_paint, paused=False, link='right_hand')
     move_arm_plot(points_to_paint, paused=False, link='right_hand')
