@@ -58,14 +58,14 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
 
     dithered_image = process_image(image_path, rows, cols)
     image_size = dithered_image._size
-    cur_col = image_size[1]
-    cur_row = image_size[0]
+    cur_col = image_size[0]
+    cur_row = image_size[1]
 
     #print_ascii_art(dithered_image)
     binary_array = (np.array(dithered_image) == 0).astype(int)
 
-    new_vp12 = dot_dist * (cur_row - 1)
-    new_vp13 = dot_dist * (cur_col - 1)
+    new_vp12 = dot_dist * (cur_col - 1)
+    new_vp13 = dot_dist * (cur_row - 1)
 
     xp2 = xp1 - new_vp12*xp12/vp12
     yp2 = yp1 - new_vp12*yp12/vp12
@@ -74,16 +74,16 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
     xp4 = xp2 + xp3 - xp1
     yp4 = yp2 + yp3 - yp1
 
-    d2x = (xp2-xp1)/(cur_row - 1) # horizontal small step from p1 to p2
-    d2y = (yp2-yp1)/(cur_col - 1) # vertical small step from p1 to p2
-    d3x = (xp3-xp1)/(cur_row - 1) # horizontal small step from p1 to p3
-    d3y = (yp3-yp1)/(cur_col - 1) # vertical small step from p1 to p3
+    d2x = (xp2-xp1)/(cur_col - 1) # horizontal small step from p1 to p2
+    d2y = (yp2-yp1)/(cur_row - 1) # vertical small step from p1 to p2
+    d3x = (xp3-xp1)/(cur_col - 1) # horizontal small step from p1 to p3
+    d3y = (yp3-yp1)/(cur_row - 1) # vertical small step from p1 to p3
     grid = []
 
     for i in range(cur_row):
         for j in range(cur_col):
-            x = xp1 + j * d2x + i * d3x
-            y = yp1 + j * d2y + i * d3y
+            x = xp1 + i * d2x + j * d3x
+            y = yp1 + i * d2y + j * d3y
             grid.append([x, y])
 
     pts_to_plot = []
@@ -107,29 +107,38 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
 
 def process_image(image_path, canvas_width, canvas_height):
     # Load & crop the image to make it a square
-    img = Image.open(image_path)
+    #img = Image.open(image_path)
     # convert to grayscale
-    img = img.convert('L')
+    #img = img.convert('L')
 
-    width, height = img.size
+    #width, height = img.size
     
     # crop if width != height
-    if width != height:
-        square_size = min(height, width)
-        left = (width - square_size) // 2
-        top = (height - square_size) // 2
-        right = left + square_size
-        bottom = top + square_size
+    #if width != height:
+    #    square_size = min(height, width)
+    #    left = (width - square_size) // 2
+    #    top = (height - square_size) // 2
+    #    right = left + square_size
+    #    bottom = top + square_size
         # crop the image
-        img = img.crop((left, top, right, bottom))
+    #    img = img.crop((left, top, right, bottom))
 
     # convert PIL image to cv2 array
-    img = np.array(img)
+    #img = np.array(img)
 
-    #img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     
     # Get original dimensions and compute aspect ratio
     original_height, original_width = img.shape
+    # Check if the image needs to be rotated
+    if original_width > original_height and canvas_width < canvas_height:
+        # Rotate the image by 90 degrees if necessary (swap width and height)
+        img = cv2.transpose(img)
+        img = cv2.flip(img, flipCode=1)  # Flip after transpose to rotate 90 degrees
+
+        # Update dimensions after rotation
+        original_height, original_width = img.shape
+            
     aspect_ratio = original_width / original_height
 
     # Calculate new dimensions while maintaining aspect ratio
