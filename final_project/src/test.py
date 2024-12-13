@@ -4,6 +4,8 @@ from moveit_commander import RobotCommander, PlanningSceneInterface, MoveGroupCo
 from geometry_msgs.msg import Pose
 from std_msgs.msg import String
 
+import time
+
 def move_arm_downward():
     # Initialize MoveIt! Commander
     rospy.init_node('test_node', anonymous=True)
@@ -43,17 +45,26 @@ def move_arm_downward():
         rospy.logwarn("Failed to move arm downward.")
 
 if __name__ == "__main__":
-    # try:
-    #     move_arm_downward()
-    # except rospy.ROSInterruptException:
-    #     pass
 
-    from moveit_commander import RobotCommander
+    points_to_paint = [[1, 2, 3], [3, 4, 5]]
 
-    # Initialize MoveIt! Commander
-    robot_commander = RobotCommander()
+    start_time = time.time()
 
-    # Get the joint names for the robot
-    joint_names = robot_commander.get_group('right_arm').get_joints()
+    # points_to_paint = move_arm_probe(points_to_paint, paused=False, link='right_hand')
 
-    print(joint_names)
+    end_probe_time = time.time()
+    elapsed_probe_time = end_probe_time - start_time
+    print(f"Total probe {elapsed_probe_time} seconds.")
+
+
+    with open('xyz.txt', 'w') as file:
+        file.write(str(points_to_paint))
+
+    # tuck_arm()
+    # tuck_arm()
+
+    # move_arm_plot(points_to_paint, paused=False, link='right_hand')
+
+    end_plot_time = time.time()
+    elapsed_plot_time = end_plot_time - start_time
+    print(f"Total runtime {elapsed_plot_time} seconds.")

@@ -82,6 +82,8 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
 
     rospy.Subscriber('button_topic', Bool, button_callback)
 
+    move_group = MoveGroupCommander(group_name, wait_for_servers=10)
+
     points_with_z = []
 
     base_request = GetPositionIKRequest()
@@ -99,8 +101,8 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
     joint_constraint_j0 = JointConstraint()
     joint_constraint_j0.joint_name = 'right_j0'
     joint_constraint_j0.position = 0.0
-    joint_constraint_j0.tolerance_above = 0.5
-    joint_constraint_j0.tolerance_below = 0.5
+    joint_constraint_j0.tolerance_above = 0.7
+    joint_constraint_j0.tolerance_below = 0.7
     joint_constraint_j0.weight = 0.7
 
     joint_constraint_j2 = JointConstraint()
@@ -125,7 +127,7 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
     for point in points:
 
         x, y, z = point[0], point[1], 0.1
-        move([x, y, z], base_request, compute_ik, constraints, group_name='right_arm', paused=False)
+        move([x, y, z], base_request, compute_ik, constraints, move_group, paused=False)
 
         # ==============================================
 
@@ -157,7 +159,7 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
             if button_pressed == True:
                 # record z position
                 points_with_z.append([x, y, z])
-                print(points_with_z[-1])
+                # print(points_with_z[-1])
                 button_pressed = False
                 # move back up
                 request.ik_request.pose_stamped.pose.position.z = 0.1
@@ -167,13 +169,13 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
                     response = compute_ik(request)
 
                     # TODO: check for errors
-                    group = MoveGroupCommander(group_name)
+                    # group = MoveGroupCommander(group_name)
                     
-                    group.set_pose_target(request.ik_request.pose_stamped)
+                    move_group.set_pose_target(request.ik_request.pose_stamped)
 
                     # Plan IK
-                    plan = group.plan()
-                    group.execute(plan[1])
+                    plan = move_group.plan()
+                    move_group.execute(plan[1])
                     #rate.sleep()
                 except rospy.ServiceException as e:
                     print("Service call failed: %s"%e)
@@ -186,20 +188,19 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
                 response = compute_ik(request)
 
                 # TODO: check for errors
-                group = MoveGroupCommander(group_name)
+                # group = MoveGroupCommander(group_name)
                 
-                group.set_pose_target(request.ik_request.pose_stamped)
+                move_group.set_pose_target(request.ik_request.pose_stamped)
 
                 # Plan IK
-                plan = group.plan()
-                group.execute(plan[1])
+                plan = move_group.plan()
+                move_group.execute(plan[1])
                 #rate.sleep()
                 
 
             except rospy.ServiceException as e:
                 print("Service call failed: %s"%e)
         
-    print(points_with_z)
     return points_with_z
 
     
@@ -232,8 +233,8 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     joint_constraint_j0 = JointConstraint()
     joint_constraint_j0.joint_name = 'right_j0'
     joint_constraint_j0.position = 0.0
-    joint_constraint_j0.tolerance_above = 0.5
-    joint_constraint_j0.tolerance_below = 0.5
+    joint_constraint_j0.tolerance_above = 0.7
+    joint_constraint_j0.tolerance_below = 0.7
     joint_constraint_j0.weight = 0.7
 
     joint_constraint_j2 = JointConstraint()
@@ -255,23 +256,26 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     constraints.name = 'sawyer_constraints'
     constraints.joint_constraints= [joint_constraint_j0, joint_constraint_j2, joint_constraint_j4]
 
+    init_point = [points[0][0], points[0][1], 0.2]
+    move(init_point, base_request, compute_ik, constraints, move_group, paused=False)
     
     for point in points:
-        x, y, z = point[0], point[1], -0.03
+        x, y, z = point[0], point[1], 0.1
 
         # move to (x, y) position to plot
         move([x, y, z], base_request, compute_ik, constraints, move_group, paused=False)
 
         # ============================================ #
 
-        x, y, z = point[0], point[1], -0.084
+        x, y, z = point[0], point[1], point[2]
         #x, y, z = point[0], point[1], 0.02
+        z += 0.002
 
         move([x, y, z], base_request, compute_ik, constraints, move_group, paused=False)
     
         # ==================================
 
-        x, y, z = point[0], point[1], -0.03
+        x, y, z = point[0], point[1], 0.1
         move([x, y, z], base_request, compute_ik, constraints, move_group, paused=False)
 
         # # Now add a collision object
