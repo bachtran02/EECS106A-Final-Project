@@ -49,14 +49,8 @@ def move(point: list, request, compute_ik, constraints, group, paused=False):
         # Send the request to the service
         response = compute_ik(request)
 
-        # TODO: check for errors
-        # group = MoveGroupCommander(group_name, wait_for_servers=10)
         # Setting position and orientation target
         group.set_pose_target(request.ik_request.pose_stamped)
-
-        # set velocity
-        # group.set_max_velocity_scaling_factor(0.4)  # 50% of max velocity
-        # group.set_max_acceleration_scaling_factor(0.4)  # 50% of max acceleration
 
         # Plan IK
         plan = group.plan()
@@ -67,13 +61,11 @@ def move(point: list, request, compute_ik, constraints, group, paused=False):
                 group.execute(plan[1])
         else: 
             group.execute(plan[1])
-            rospy.sleep(1.0)
 
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
 
 def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', source_frame='base', paused=True):
-    # offset wrist and gripper_tip: -0.27
 
     global button_pressed
 
@@ -90,7 +82,6 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
     base_request.ik_request.group_name = group_name
     base_request.ik_request.ik_link_name = link
     base_request.ik_request.pose_stamped.header.frame_id = source_frame
-    # base_request.ik_request.attempts = 20
 
     base_request.ik_request.pose_stamped.pose.orientation.x = 0.0
     base_request.ik_request.pose_stamped.pose.orientation.y = 1.0
@@ -119,7 +110,6 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
     joint_constraint_j4.tolerance_below = 0.4
     joint_constraint_j4.weight = 0.7
 
-
     constraints = Constraints()
     constraints.name = 'sawyer_constraints'
     constraints.joint_constraints= [joint_constraint_j0, joint_constraint_j2, joint_constraint_j4]
@@ -135,12 +125,10 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
         request.ik_request.group_name = group_name
         request.ik_request.ik_link_name = link
         request.ik_request.pose_stamped.header.frame_id = source_frame
-        # request.ik_request.attempts = 20
 
         # Set the desired orientation for the end effector
         request.ik_request.pose_stamped.pose.position.x = x
         request.ik_request.pose_stamped.pose.position.y = y
-        # request.ik_request.pose_stamped.pose.position.z -= step_down_dist
         request.ik_request.pose_stamped.pose.orientation.x = 0.0
         request.ik_request.pose_stamped.pose.orientation.y = 1.0
         request.ik_request.pose_stamped.pose.orientation.z = 0.0
@@ -159,7 +147,6 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
             if button_pressed == True:
                 # record z position
                 points_with_z.append([x, y, z])
-                # print(points_with_z[-1])
                 button_pressed = False
                 # move back up
                 request.ik_request.pose_stamped.pose.position.z = 0.1
@@ -167,16 +154,13 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
 
                     # Send the request to the service
                     response = compute_ik(request)
-
-                    # TODO: check for errors
-                    # group = MoveGroupCommander(group_name)
                     
                     move_group.set_pose_target(request.ik_request.pose_stamped)
 
                     # Plan IK
                     plan = move_group.plan()
                     move_group.execute(plan[1])
-                    #rate.sleep()
+
                 except rospy.ServiceException as e:
                     print("Service call failed: %s"%e)
 
@@ -186,17 +170,12 @@ def move_arm_probe(points: list, group_name='right_arm', link='_gripper_tip', so
 
                 # Send the request to the service
                 response = compute_ik(request)
-
-                # TODO: check for errors
-                # group = MoveGroupCommander(group_name)
                 
                 move_group.set_pose_target(request.ik_request.pose_stamped)
 
                 # Plan IK
                 plan = move_group.plan()
-                move_group.execute(plan[1])
-                #rate.sleep()
-                
+                move_group.execute(plan[1])                
 
             except rospy.ServiceException as e:
                 print("Service call failed: %s"%e)
@@ -211,7 +190,6 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     replace '_gripper_tip' with '_wrist' instead
     """
 
-    # TODO: add timeout here
     # Wait for the IK service to become available
     rospy.wait_for_service('compute_ik')
     compute_ik = rospy.ServiceProxy('compute_ik', GetPositionIK)
@@ -222,7 +200,6 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     base_request.ik_request.group_name = group_name
     base_request.ik_request.ik_link_name = link
     base_request.ik_request.pose_stamped.header.frame_id = source_frame
-    # base_request.ik_request.attempts = 20
 
     base_request.ik_request.pose_stamped.pose.orientation.x = 0.0
     base_request.ik_request.pose_stamped.pose.orientation.y = 1.0
@@ -251,7 +228,6 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
     joint_constraint_j4.tolerance_below = 0.4
     joint_constraint_j4.weight = 0.7
 
-
     constraints = Constraints()
     constraints.name = 'sawyer_constraints'
     constraints.joint_constraints= [joint_constraint_j0, joint_constraint_j2, joint_constraint_j4]
@@ -268,8 +244,9 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
         # ============================================ #
 
         x, y, z = point[0], point[1], point[2]
-        #x, y, z = point[0], point[1], 0.02
-        z += 0.002
+        
+        # Add a little offset between button height and marker height
+        z += 0.001
 
         move([x, y, z], base_request, compute_ik, constraints, move_group, paused=False)
     
@@ -277,25 +254,3 @@ def move_arm_plot(points: list, group_name='right_arm', link='right_hand', sourc
 
         x, y, z = point[0], point[1], 0.1
         move([x, y, z], base_request, compute_ik, constraints, move_group, paused=False)
-
-        # # Now add a collision object
-        # planning_scene_interface = PlanningSceneInterface()
-
-        # # Create and define a collision object (e.g., a box)
-        # collision_object = CollisionObject()
-        # collision_object.id = 'obstacle_table'  # Name the object
-
-        # # Define the position and shape of the collision object (a box)
-        # table_pose = PoseStamped()
-        # table_pose.header.frame_id = "base"  # You can use "world" or another frame like "base_link"
-        # table_pose.header.stamp = rospy.Time.now()  # Timestamp
-        # table_pose.pose.position.x = 0.0  # x-coordinate of the table
-        # table_pose.pose.position.y = 0.0  # y-coordinate of the table
-        # table_pose.pose.position.z = -0.095  # z-coordinate of the table
-        # table_pose.pose.orientation.w = 1.0  # Orientation (no rotation)
-
-        # # Define the dimensions of the collision object (table dimensions)
-        # table_dimensions = (3, 3, 0.001)  # Length, width, height in meters
-
-        # # Add the collision object (table) to the planning scene
-        # planning_scene_interface.add_box(collision_object.id, table_pose, table_dimensions)
