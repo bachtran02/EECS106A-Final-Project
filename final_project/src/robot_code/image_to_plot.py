@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import itertools
 
 def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
 
@@ -90,6 +91,13 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
             if binary_array[i][j] == 1:
                 pts_to_plot.append(grid[i * (len(binary_array[0])) + j])
 
+    total_distance = calculate_total_distance(pts_to_plot)
+    print('Total distance before ordering: ', total_distance)
+    path, total_distance_ordered = tsp_path_planner(pts_to_plot)
+    print('Total distance after ordering: ', total_distance_ordered)
+    pts_to_plot = np.array(pts_to_plot)
+    pts_to_plot = pts_to_plot[path]
+    
     # code to plot image
     x_coords, y_coords = zip(*pts_to_plot)
     plt.scatter(x_coords, y_coords, color='black', label='Points')  # Plot points
@@ -142,3 +150,65 @@ def print_ascii_art(image):
 
     # Print the ASCII art
     print(ascii_art)
+
+def calculate_distance_matrix(points):
+    """Compute a distance matrix for the given points."""
+    n = len(points)
+    dist_matrix = np.zeros((n, n))
+    for i, j in itertools.combinations(range(n), 2):
+        dist = np.linalg.norm(points[i] - points[j])
+        dist_matrix[i, j] = dist
+        dist_matrix[j, i] = dist
+    return dist_matrix
+
+def greedy_tsp(points, dist_matrix):
+    """Generate an initial greedy TSP path."""
+    n = len(points)
+    unvisited = set(range(1, n))
+    path = [0]  # Start with the first point
+    while unvisited:
+        last = path[-1]
+        next_point = min(unvisited, key=lambda x: dist_matrix[last, x])
+        path.append(next_point)
+        unvisited.remove(next_point)
+    return path
+
+def calculate_total_distance(points):
+    """
+    Calculate the total distance between consecutive points in a given order.
+    """
+    points = np.array(points)
+    total_distance = 0
+    for i in range(len(points) - 1):
+        total_distance += np.linalg.norm(points[i] - points[i + 1])
+    return total_distance
+
+def calculate_total_distance_ordered(path, dist_matrix):
+    """Calculate the total distance of a TSP path."""
+    return sum(dist_matrix[path[i], path[i + 1]] for i in range(len(path) - 1)) + dist_matrix[path[-1], path[0]]
+
+def two_opt(path, dist_matrix):
+    """Improve the TSP path using the 2-opt algorithm."""
+    best_path = path
+    best_distance = calculate_total_distance_ordered(path, dist_matrix)
+    n = len(path)
+    improvement = True
+    while improvement:
+        improvement = False
+        for i in range(1, n - 2):  # Avoid breaking the first and last connections
+            for j in range(i + 1, n):
+                new_path = best_path[:i] + best_path[i:j][::-1] + best_path[j:]
+                new_distance = calculate_total_distance_ordered(new_path, dist_matrix)
+                if new_distance < best_distance:
+                    best_path = new_path
+                    best_distance = new_distance
+                    improvement = True
+    return best_path
+
+def tsp_path_planner(points):
+    """Find the best TSP path using a greedy initialization and 2-opt optimization."""
+    points = np.array(points)
+    dist_matrix = calculate_distance_matrix(points)
+    initial_path = greedy_tsp(points, dist_matrix)
+    optimized_path = two_opt(initial_path, dist_matrix)
+    return optimized_path, calculate_total_distance_ordered(optimized_path, dist_matrix)
