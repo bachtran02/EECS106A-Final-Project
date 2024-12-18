@@ -106,32 +106,12 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
     return pts_to_plot
 
 def process_image(image_path, canvas_width, canvas_height):
-    # Load & crop the image to make it a square
-    #img = Image.open(image_path)
-    # convert to grayscale
-    #img = img.convert('L')
-
-    #width, height = img.size
-    
-    # crop if width != height
-    #if width != height:
-    #    square_size = min(height, width)
-    #    left = (width - square_size) // 2
-    #    top = (height - square_size) // 2
-    #    right = left + square_size
-    #    bottom = top + square_size
-        # crop the image
-    #    img = img.crop((left, top, right, bottom))
-
-    # convert PIL image to cv2 array
-    #img = np.array(img)
-
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     
     # Get original dimensions and compute aspect ratio
     original_height, original_width = img.shape
     # Check if the image needs to be rotated
-    if original_width > original_height and canvas_width < canvas_height:
+    if original_width > original_height and canvas_width < canvas_height or original_width < original_height and canvas_width > canvas_height:
         # Rotate the image by 90 degrees if necessary (swap width and height)
         img = cv2.transpose(img)
         img = cv2.flip(img, flipCode=1)  # Flip after transpose to rotate 90 degrees
