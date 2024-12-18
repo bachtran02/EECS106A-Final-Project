@@ -31,7 +31,6 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
         v12 = np.sqrt((x12)**2 + (y12)**2)
         v13 = np.sqrt((x13)**2 + (y13)**2)
 
-
     x1_ = x1 - offset*x12/v12
     y1_ = y1 - offset*y12/v12
     x2_ = x2 + offset*x12/v12
@@ -54,7 +53,6 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
     vp13 = np.sqrt((xp13)**2 + (yp13)**2)
     rows = np.floor(vp12/dot_dist + 1)
     cols = np.floor(vp13/dot_dist + 1)
-
 
     dithered_image = process_image(image_path, rows, cols)
     image_size = dithered_image._size
@@ -98,11 +96,8 @@ def create_rectangle_dots(tags: list, image_path, offset=0.5, dot_dist=0.1):
     plt.scatter([x1, x2, x3, x4], [y1, y2, y3, y4], color='red', marker='o')
     plt.scatter([xp1, xp2, xp3, xp4], [yp1, yp2, yp3, yp4], color='green', marker='o')
     plt.grid(True)  # Add gridlines for better visualization
-    #plt.show()
     plt.savefig("plot_image.png", dpi=300)
 
-    #return [(xp1, yp1), (xp2, yp2), (xp3, yp3), (xp4, yp4)]
-    #print(pts_to_plot)
     return pts_to_plot
 
 def process_image(image_path, canvas_width, canvas_height):
@@ -138,17 +133,9 @@ def process_image(image_path, canvas_width, canvas_height):
 
     return dithered_image
 
-def rotate_point(x, y, angle, origin=(0, 0)):
-    """Rotate a point (x, y) around a given origin by a specified angle (in radians)."""
-    cos_angle = np.cos(angle)
-    sin_angle = np.sin(angle)
-    x_rot = cos_angle * (x - origin[0]) - sin_angle * (y - origin[1]) + origin[0]
-    y_rot = sin_angle * (x - origin[0]) + cos_angle * (y - origin[1]) + origin[1]
-    return x_rot, y_rot
-
 def print_ascii_art(image):
     # Convert the image to a binary array (0 for white, 1 for black)
-    binary_array = (np.array(image) == 0).astype(int)  # 0 is black in "1" mode
+    binary_array = (np.array(image) == 0).astype(int)
 
     # Generate the ASCII art
     ascii_art = "\n".join("".join("#" if pixel == 1 else " " for pixel in row) for row in binary_array)
